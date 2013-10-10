@@ -1,0 +1,21 @@
+apply plugin: 'groovy'	
+
+repositories {
+        mavenCentral()
+        mavenLocal()
+      
+
+    //flatDir { dirs "/Users/chance/groovy/emailer/src/main/resources"
+    //}
+}
+
+dependencies {
+        compile "org.codehaus.groovy:groovy-all:1.8.6"
+       compile "javax.mail:mail:1.4"
+     // compile "javax.activation:javax.activation:1.1.1"
+      // compile fileTree(dir: 'lib', include: '*.jar')
+}
+
+jar {
+	manifest.attributes main: 'emailer'
+}

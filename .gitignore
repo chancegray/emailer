@@ -1,0 +1,14 @@
+# IDE support files
+/.classpath
+/.launch
+/.project
+/.settings
+/*.launch
+/*.tmproj
+/ivy*
+/eclipse
+
+# gradle artifacts
+/.gradle
+/build
+*/build
