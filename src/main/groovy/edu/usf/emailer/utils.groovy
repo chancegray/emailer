@@ -1,5 +1,8 @@
 package edu.usf.cims.emailer
 
+import groovy.sql.Sql
+
+
 def getVIPGroups(Sql sql) {
 	def groups = [:]
 	sql.eachRow('select gid, label from vip_group') {

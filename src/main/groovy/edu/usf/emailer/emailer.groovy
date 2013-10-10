@@ -6,21 +6,30 @@ import javax.activation.*
 import groovy.sql.Sql
 
 
+class emailer {
 
-config = new ConfigSlurper().parse(new File(System.getProperty("user.home")+'/emailer/emailer.properties').toURL())
+	public static void main(String[] args) {
 
-props = config.toProperties()
+		def config = new ConfigSlurper().parse(new File(System.getProperty("user.home")+'/emailer/emailer.properties').toURL())
 
-//props = new Properties()
-props.put('mail.smtp.host', config.smtpHost)
-props.put('mail.smtp.port', '25')
-session = Session.getDefaultInstance(props, null)
+		def props = config.toProperties()
 
-text = File(config.template)
+		//props = new Properties()
+		/*
+		props.put('mail.smtp.host', config.smtpHost)
+		props.put('mail.smtp.port', '25')
+		session = Session.getDefaultInstance(props, null)
+		*/
 
-def sql = Sql.newInstance("jdbc:mysql://dev.it.usf.edu:3306/nams",props)
+		def text = File(config.template).getText()
 
-def expiredVIPs = getExpiredVIPs(sql)
+		def sql = Sql.newInstance("jdbc:mysql://dev.it.usf.edu:3306/nams",props)
 
-def template = engine.createTemplate(text).make(expiredVIPs)
-println template.toString()
+		def expiredVIPs = getExpiredVIPs(sql)
+
+		def engine = new groovy.text.GStringTemplateEngine()
+
+		def template =  engine.createTemplate(text).make(expiredVIPs)
+		println template.toString()
+	}
+}
