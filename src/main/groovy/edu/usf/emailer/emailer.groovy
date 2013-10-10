@@ -1,3 +1,5 @@
+package edu.usf.cims.emailer
+
 import javax.mail.*
 import javax.mail.internet.*
 import javax.activation.*;
@@ -10,6 +12,8 @@ props.put('mail.smtp.host', config.smtpHost)
 props.put('mail.smtp.port', '25')
 session = Session.getDefaultInstance(props, null)
 
+
+/*
 // Construct the message
 msg = new MimeMessage(session)
 devteam = new InternetAddress('chance@mail.usf.edu')
@@ -22,3 +26,4 @@ msg.setContent(config.content,config.contentType)
 
 // Send the message
 Transport.send(msg)
+*/
