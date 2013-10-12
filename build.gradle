@@ -1,21 +1,42 @@
-apply plugin: 'groovy'	
+apply plugin: 'groovy'
+apply plugin: 'application'
+group = 'edu.usf.cims'
+version = '0.1'
+mainClassName = 'edu.usf.cims.emailer.emailer'
+manifest.mainAttributes("Main-Class" : 'edu.usf.cims.emailer.emailer')
+
 
 repositories {
         mavenCentral()
         mavenLocal()
-      
+}
 
-    //flatDir { dirs "/Users/chance/groovy/emailer/src/main/resources"
-    //}
+project.ext {
+  groovyVersion = '2.0.5'
 }
 
 dependencies {
-        compile "org.codehaus.groovy:groovy-all:1.8.6"
-       compile "javax.mail:mail:1.4"
-     // compile "javax.activation:javax.activation:1.1.1"
-      // compile fileTree(dir: 'lib', include: '*.jar')
+    groovy "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    compile "javax.mail:mail:1.4"
+    compile 'mysql:mysql-connector-java:5.1.26'
+
 }
 
-jar {
-	manifest.attributes main: 'emailer'
+ task wrapper(type: Wrapper) {
+    gradleVersion = '1.6'
+} 
+
+task show << {
+    println relativePath(compileGroovy.destinationDir)
+    println relativePath(processResources.destinationDir)
+}
+task uberjar(type: Jar) {
+    dependsOn jar
+
+    from files(sourceSets.main.output.classesDir)
+    from configurations.runtime.asFileTree.files.collect { zipTree(it) }
+
+    manifest {
+        attributes 'Main-Class': 'edu.usf.cims.emailer.emailer'
+    }
 }
