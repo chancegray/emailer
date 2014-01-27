@@ -2,8 +2,8 @@ apply plugin: 'groovy'
 apply plugin: 'application'
 group = 'edu.usf.cims'
 version = '0.1'
-mainClassName = 'edu.usf.cims.emailer.emailer'
-manifest.mainAttributes("Main-Class" : 'edu.usf.cims.emailer.emailer')
+mainClassName = 'edu.usf.cims.emailer.Emailer'
+manifest.mainAttributes("Main-Class" : 'edu.usf.cims.emailer.Emailer')
 
 
 repositories {
@@ -13,13 +13,17 @@ repositories {
 
 project.ext {
   groovyVersion = '2.0.5'
+  commonsCliVersion = '1.2'
+  spockVersion = '0.7-groovy-2.0'
 }
 
 dependencies {
-    groovy "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
     compile "javax.mail:mail:1.4"
     compile 'mysql:mysql-connector-java:5.1.26'
+    compile "commons-cli:commons-cli:${commonsCliVersion}"
 
+    testCompile "org.spockframework:spock-core:${spockVersion}" 
 }
 
  task wrapper(type: Wrapper) {
