@@ -43,6 +43,10 @@ println 'got data'
 		cli.with {
 			h longOpt:'help', 'usage information', required: false
 			v longOpt:'version', 'version information', required: false  
+			i longOpt:'inputFile', args:1, argName:'inputFile', 'csv file with email address and template values'
+			f longOpt:'fromAddr', args:1, argName:'fromAddr', 'address of the sender'
+			t longOpt:'template', args:1, argName:'template', 'template of the message'
+		
 			_ longOpt:'defaults', args:1, argName:'configFileName', 'groovy config file', required: false
 		}
 
@@ -57,6 +61,21 @@ println 'got data'
 		//Display usage if --help is given 
 		if( (options.help) ){
 			cli.usage() 
+			System.exit(0)
+		}
+
+		if( (options.fromAddr) ) {
+			println "\n${options.fromAddr}\n"
+			System.exit(0)
+		}
+
+		if( (options.inputFile) ) {
+			println "\n${options.inputFile}\n"
+			System.exit(0)
+		}
+
+		if( (options.template) ) {
+			println "\n${options.template}\n"
 			System.exit(0)
 		}
 
