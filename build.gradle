@@ -15,6 +15,9 @@ project.ext {
   groovyVersion = '2.0.5'
   commonsCliVersion = '1.2'
   spockVersion = '0.7-groovy-2.0'
+  //opencsvVersion = '2.3'
+  groovycsvVersion = '1.0'
+
 }
 
 dependencies {
@@ -22,6 +25,11 @@ dependencies {
     compile "javax.mail:mail:1.4"
     compile 'mysql:mysql-connector-java:5.1.26'
     compile "commons-cli:commons-cli:${commonsCliVersion}"
+    //compile "net.sf.opencsv:opencsv:${opencsvVersion}" 
+    compile "com.xlson.groovycsv:groovycsv:${groovycsvVersion}"
+    groovy group: 'org.apache.ivy', name:'ivy', version:'2.2.0' 
+ 
+
 
     testCompile "org.spockframework:spock-core:${spockVersion}" 
 }

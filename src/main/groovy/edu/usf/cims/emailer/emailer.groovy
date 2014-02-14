@@ -8,6 +8,9 @@ import javax.activation.*
 import groovy.sql.Sql
 import java.utils.*
 
+import static com.xlson.groovycsv.CsvParser.parseCsv
+
+
 class Emailer {
 
 	def sql
@@ -22,11 +25,12 @@ class Emailer {
 		def conf = getConfigSettings(opt)
 		def props = conf.toProperties()
 
-		def myGroups = getVIPGroups(props)
-		def myexpiredVIPs = getExpiredVIPs(props)
+		def myvips = getExpiredVIPsFromCSV(opt)
+		//def myGroups = getVIPGroups(props)
+		//def myexpiredVIPs = getExpiredVIPs(props)
 println 'got data'
-		def myTemplate = runTemplate(conf,props)
-
+		//def myTemplate = runTemplate(conf,props)
+for(it in myvips){println "$it.fname $it.lname $it.expiration_dt"}
 		}catch(Exception e) {
 			exitOnError e.message
 		}
@@ -46,6 +50,7 @@ println 'got data'
 			i longOpt:'inputFile', args:1, argName:'inputFile', 'csv file with email address and template values'
 			f longOpt:'fromAddr', args:1, argName:'fromAddr', 'address of the sender'
 			t longOpt:'template', args:1, argName:'template', 'template of the message'
+			e longOpt:'emailHdr', args:1, argName:'emailHdr', 'Header in csv file to identify column with email addresses'
 		
 			_ longOpt:'defaults', args:1, argName:'configFileName', 'groovy config file', required: false
 		}
@@ -66,11 +71,6 @@ println 'got data'
 
 		if( (options.fromAddr) ) {
 			println "\n${options.fromAddr}\n"
-			System.exit(0)
-		}
-
-		if( (options.inputFile) ) {
-			println "\n${options.inputFile}\n"
 			System.exit(0)
 		}
 
@@ -149,6 +149,12 @@ println 'defining template'
 		expiration_dt between '2013-01-03 00:00:00' and '2013-01-20 00:00:00' 
 		and vgm.function='M'
 		""")
+	}
+
+private static getExpiredVIPsFromCSV(options) {
+   		def fstring = new File(options.inputFile).getText()
+		def data = parseCsv(fstring)
+
 	}
 
 	private static exitOnError(errorString){
