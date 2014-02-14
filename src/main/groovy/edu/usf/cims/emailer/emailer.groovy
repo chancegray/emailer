@@ -30,7 +30,11 @@ class Emailer {
 		//def myexpiredVIPs = getExpiredVIPs(props)
 println 'got data'
 		//def myTemplate = runTemplate(conf,props)
+		def myTemplate = runTemplate(conf,props,opt)
+/*
 for(it in myvips){println "$it.fname $it.lname $it.expiration_dt"}
+*/
+		sendEmail(props,myTemplate)
 		}catch(Exception e) {
 			exitOnError e.message
 		}
@@ -105,20 +109,23 @@ for(it in myvips){println "$it.fname $it.lname $it.expiration_dt"}
 		return config
 	}
 
-	private static runTemplate (config,props) {
+	private static runTemplate (config,props,options) {
 println 'running template'
 		// def props = config.toProperties()
 		def text = new File(config.templatePath).getText()
 println 'got text'
-		def expiredVIPs = getExpiredVIPs(props)
+		//def expiredVIPs = getExpiredVIPs(props)
+		def expiredVIPs = getExpiredVIPsFromCSV(options)
 println 'got ExpiredVIPs'
 		def groups = [ groups : expiredVIPs.groupBy {"${it.gid}-${it.created_vipid}"}.values() ]
+		//def groups = [ groups : expiredVIPs.values() ]
+
 println 'defined groups'
 		def engine = new groovy.text.GStringTemplateEngine()
 println 'created template engine'
 		def template =  engine.createTemplate(text).make(groups)
 println 'defining template'
-		println template.toString()
+		template = template.toString()
 		template
 	}
 
@@ -154,12 +161,48 @@ println 'defining template'
 private static getExpiredVIPsFromCSV(options) {
    		def fstring = new File(options.inputFile).getText()
 		def data = parseCsv(fstring)
+		def result = []
+		for(line in data){
+			result+=[gid: "$line.gid" ,
+					fname: "$line.fname",
+					lname: "$line.lname",
+					created_dt: "$line.created_dt",
+					created_vipid: "$line.created_vipid",
+					expiration_dt: "$line.expiration_dt", ]
+
+		}
+		result
 
 	}
 
 	private static exitOnError(errorString){
 		println("\nEmailer ERROR: ${errorString}\n")
 		System.exit(1)
+	}
+	private static sendEmail(props, templateText) {
+		//props = new Properties()
+props.put('mail.smtp.host', 'aspmx.l.google.com')
+//props.put('mail.smtp.host', 'bumblebee.forest.usf.edu')
+
+//props.put('mail.smtp.port', port.toString())
+def session = Session.getDefaultInstance(props, null)
+
+// Construct the message
+def msg = new MimeMessage(session)
+//def devteam = new InternetAddress('dwest@mail.usf.edu')
+def devteam = new InternetAddress(props.recipient)
+//partners = new InternetAddress('partners@mycompany.org')
+msg.from = new InternetAddress('chance@usf.edu','Chance Gray')
+msg.sentDate = new Date()
+msg.subject = 'VIP Expiration Warning'
+msg.setRecipient(Message.RecipientType.TO, devteam)
+//msg.setRecipient(Message.RecipientType.CC, partners)
+msg.setHeader('Organization', 'USF-IT')
+msg.setContent(templateText, "text/html")
+// Send the message
+Transport.send(msg)
+
+
 	}
 
 }
