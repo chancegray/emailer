@@ -1,19 +1,21 @@
 package edu.usf.cims.emailer
 
+//for email functionality
 import javax.mail.*
 import javax.mail.internet.*
+import javax.activation.*
+
+//for cli parsing and config munging
 import groovy.util.CliBuilder
 import org.apache.commons.cli.Option
-import javax.activation.*
-import groovy.sql.Sql
 import java.utils.*
 
+//for reading csv input files specified at runtime
 import static com.xlson.groovycsv.CsvParser.parseCsv
 
 
 class Emailer {
 
-	def sql
 	def myTemplate
 	static def version = "0.0.1"
 	def conf = new ConfigObject()
@@ -24,17 +26,10 @@ class Emailer {
 		def opt = getCommandLineOptions(args)
 		def conf = getConfigSettings(opt)
 		def props = conf.toProperties()
-
-		def myvips = getExpiredVIPsFromCSV(opt)
-		//def myGroups = getVIPGroups(props)
-		//def myexpiredVIPs = getExpiredVIPs(props)
-println 'got data'
-		//def myTemplate = runTemplate(conf,props)
 		def myTemplate = runTemplate(conf,props,opt)
-/*
-for(it in myvips){println "$it.fname $it.lname $it.expiration_dt"}
-*/
+
 		sendEmail(props,myTemplate)
+
 		}catch(Exception e) {
 			exitOnError e.message
 		}
@@ -54,7 +49,7 @@ for(it in myvips){println "$it.fname $it.lname $it.expiration_dt"}
 			i longOpt:'inputFile', args:1, argName:'inputFile', 'csv file with email address and template values'
 			f longOpt:'fromAddr', args:1, argName:'fromAddr', 'address of the sender'
 			t longOpt:'template', args:1, argName:'template', 'template of the message'
-			e longOpt:'emailHdr', args:1, argName:'emailHdr', 'Header in csv file to identify column with email addresses'
+			e longOpt:'emailHdr', args:1, argName:'emailHdr', 'Header in csv file to identify column with recipient email addresses'
 		
 			_ longOpt:'defaults', args:1, argName:'configFileName', 'groovy config file', required: false
 		}
@@ -110,67 +105,22 @@ for(it in myvips){println "$it.fname $it.lname $it.expiration_dt"}
 	}
 
 	private static runTemplate (config,props,options) {
-println 'running template'
-		// def props = config.toProperties()
 		def text = new File(config.templatePath).getText()
-println 'got text'
-		//def expiredVIPs = getExpiredVIPs(props)
-		def expiredVIPs = getExpiredVIPsFromCSV(options)
-println 'got ExpiredVIPs'
+		def expiredVIPs = retrieveCSVContents(options)
 		def groups = [ groups : expiredVIPs.groupBy {"${it.gid}-${it.created_vipid}"}.values() ]
-		//def groups = [ groups : expiredVIPs.values() ]
-
-println 'defined groups'
 		def engine = new groovy.text.GStringTemplateEngine()
-println 'created template engine'
 		def template =  engine.createTemplate(text).make(groups)
-println 'defining template'
 		template = template.toString()
 		template
 	}
 
-	private static getVIPGroups(props) {
-		def groups = [:]
-		def sql = Sql.newInstance("jdbc:mysql://dev.it.usf.edu:3306/nams",props)
-		sql.eachRow('select gid, label from vip_group') {
-			groups.put(it.gid, it.label)
-		}
-		groups
-	}
-
-	private static getExpiredVIPs(props) {
-
-		def sql = Sql.newInstance("jdbc:mysql://dev.it.usf.edu:3306/nams",props)
-
-		def vips = sql.rows("""select
-		vg.gid as gid,
-		v.fname as fname,
-		v.lname as lname,
-		vgm.created_dt as created_dt,
-		vgm.created_vipid as created_vipid,
-		vgm.expiration_dt as expiration_dt
-		from vip_group_member vgm 
-		LEFT JOIN vip_group vg ON vgm.gid=vg.gid 
-		LEFT JOIN vip v on v.vipid=vgm.vipid
-		where 
-		expiration_dt between '2013-01-03 00:00:00' and '2013-01-20 00:00:00' 
-		and vgm.function='M'
-		""")
-	}
-
-private static getExpiredVIPsFromCSV(options) {
+private static retrieveCSVContents(options) {
    		def fstring = new File(options.inputFile).getText()
 		def data = parseCsv(fstring)
 		def result = []
 		for(line in data){
-			result+=[gid: "$line.gid" ,
-					fname: "$line.fname",
-					lname: "$line.lname",
-					created_dt: "$line.created_dt",
-					created_vipid: "$line.created_vipid",
-					expiration_dt: "$line.expiration_dt", ]
-
-		}
+			result+=([line])
+			}
 		result
 
 	}
@@ -180,27 +130,20 @@ private static getExpiredVIPsFromCSV(options) {
 		System.exit(1)
 	}
 	private static sendEmail(props, templateText) {
-		//props = new Properties()
-props.put('mail.smtp.host', 'aspmx.l.google.com')
-//props.put('mail.smtp.host', 'bumblebee.forest.usf.edu')
 
-//props.put('mail.smtp.port', port.toString())
-def session = Session.getDefaultInstance(props, null)
+		def session = Session.getDefaultInstance(props, null)
 
-// Construct the message
-def msg = new MimeMessage(session)
-//def devteam = new InternetAddress('dwest@mail.usf.edu')
-def devteam = new InternetAddress(props.recipient)
-//partners = new InternetAddress('partners@mycompany.org')
-msg.from = new InternetAddress('chance@usf.edu','Chance Gray')
-msg.sentDate = new Date()
-msg.subject = 'VIP Expiration Warning'
-msg.setRecipient(Message.RecipientType.TO, devteam)
-//msg.setRecipient(Message.RecipientType.CC, partners)
-msg.setHeader('Organization', 'USF-IT')
-msg.setContent(templateText, "text/html")
-// Send the message
-Transport.send(msg)
+		// Construct the message
+		def msg = new MimeMessage(session)
+		def devteam = new InternetAddress(props.recipient)
+		msg.from = new InternetAddress(props.sender)
+		msg.sentDate = new Date()
+		msg.subject = props.subject
+		msg.setRecipient(Message.RecipientType.TO, devteam)
+		msg.setHeader('Organization', 'USF-IT')
+		msg.setContent(templateText, "text/html")
+		// Send the message
+		Transport.send(msg)
 
 
 	}
