@@ -26,9 +26,15 @@ class Emailer {
 		def opt = getCommandLineOptions(args)
 		def conf = getConfigSettings(opt)
 		def props = conf.toProperties()
-		def myTemplate = runTemplate(conf,props,opt)
+		def CSVContents = retrieveCSVContents(opt)
+		//TODO: maybe the group by can be passed in
+		//def groups = [ groups : CSVContents.groupBy {"${it.gid}-${it.created_vipid}"}.values() ]
+		//BTW this works
+		def templateData = [ templateData : CSVContents ]
 
-		sendEmail(props,myTemplate)
+		def myTemplate = runTemplate(conf,templateData)
+		println myTemplate
+		//sendEmail(props,myTemplate)
 
 		}catch(Exception e) {
 			exitOnError e.message
@@ -63,7 +69,7 @@ class Emailer {
 		}
 
 		//Display usage if --help is given 
-		if( (options.help) ){
+		if( (options.help) ) {
 			cli.usage() 
 			System.exit(0)
 		}
@@ -104,17 +110,15 @@ class Emailer {
 		return config
 	}
 
-	private static runTemplate (config,props,options) {
+	private static runTemplate (config,groups) {
 		def text = new File(config.templatePath).getText()
-		def expiredVIPs = retrieveCSVContents(options)
-		def groups = [ groups : expiredVIPs.groupBy {"${it.gid}-${it.created_vipid}"}.values() ]
 		def engine = new groovy.text.GStringTemplateEngine()
 		def template =  engine.createTemplate(text).make(groups)
 		template = template.toString()
 		template
 	}
 
-private static retrieveCSVContents(options) {
+	private static retrieveCSVContents(options) {
    		def fstring = new File(options.inputFile).getText()
 		def data = parseCsv(fstring)
 		def result = []
@@ -140,6 +144,7 @@ private static retrieveCSVContents(options) {
 		msg.sentDate = new Date()
 		msg.subject = props.subject
 		msg.setRecipient(Message.RecipientType.TO, devteam)
+		//TODO: create Header iterator
 		msg.setHeader('Organization', 'USF-IT')
 		msg.setContent(templateText, "text/html")
 		// Send the message

@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>VIP Expiration Warning</title>
+</head>
+
+<body style="margin:0;padding:0">
+&nbsp;&nbsp;
+
+<table align="left">
+
+Good morning, Sponsor:
+<br><br>
+
+Thank you for being a Sponsor in our VIP System. As agreed, we will contact you 
+to confirm the individuals you sponsored are still affiliated with USF and they still 
+require the access to the services that was originally requested by you on their behalf.
+<br><br>
+
+The following individuals have accounts that are set to expire, resulting in loss of
+services, in the next _____ days if no further action is taken by you as their 
+Sponsor:
+<br><br>
+<table>
+	<thead>
+		<th>FirstName</th>
+		<th>LastName</th>
+		<th>Expiration Date</th>
+	</thead>
+
+<% templateData.groupBy {"${it.gid}-${it.created_vipid}"}.values().each { group -> group.each { persons -> %>
+<%="<tr><td>${persons.gid}-${persons.created_vipid}</td><td>${persons.fname}</td><td>${persons.lname}</td><td>${persons.expiration_dt}</td></tr>"
+%><%	} %>
+<% } %>
+</table>
+
+<br><br>
+
+Please provide a status for each person listed, including their current relationship 
+with USF, so we can take the appropriate action on their account.
+<br><br>
+
+We appreciate your time and assistance in ensuring only authorized persons have 
+access to IT services and resources, thus protecting the information contained
+therein.
+<br><br>
+
+If you have any questions, please contact <font color="#0000ff" face="Times">
+<a href="mailto:IT-Security@usf.edu" target="_blank">IT-Security@usf.edu </a></font>for more </div>
+information.
+<br><br>
+
+Thank you.
+<br><br>
+
+Kay Svendgard
+<br>
+VIP System Owner
+<br>
+USF-IT- Office of Information Security
+<br>
+</body>
+</html>
+
