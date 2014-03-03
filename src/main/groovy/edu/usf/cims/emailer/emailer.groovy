@@ -14,7 +14,9 @@ import java.utils.*
 import static com.xlson.groovycsv.CsvParser.parseCsv
 
 
+
 class Emailer {
+	static def cli
 
 	def myTemplate
 	static def version = "20140220-Alpha"
@@ -22,32 +24,54 @@ class Emailer {
 
 	public static void main(String[] args) {
 
-	try {			
-		def opt = getCommandLineOptions(args)
-		def conf = getConfigSettings(opt)
+		try {			
+			def opt = getCommandLineOptions(args)
+			def conf = getConfigSettings(opt)
 
-		//get data
-		def CSVContents = retrieveCSVContents(conf)
-		
-		//create template
-		def templateData = [ templateData : CSVContents ]
+			//get data
+			def CSVContents = retrieveCSVContents(conf)
+			
+			//if a recipient hdr is supplied then populate
+			//recipients from that column of the CSV
+			if (conf.recipientHdr) {
+				conf.recipients=[]
+				for (csvline in CSVContents) {
+					conf.recipients+=csvline.(conf.recipientHdr)
+				}
 
-		//process the template
-		def myTemplate = runTemplate(conf,templateData)
-
-		// final action
-		if (opt.debug) {
-
-			println myTemplate
-			println ""
-			println conf
-			println ""
-		
-			} else {
-				sendEmail(conf, myTemplate)
 			}
 
-		}catch(Exception e) {
+			for (recipient in conf.recipients) {
+
+				//create template
+				def templateData = [ templateData : CSVContents, recipientAddr : recipient, recipientHdr : conf.recipientHdr ]
+
+				//process the template
+				def myTemplate = runTemplate(conf,templateData)
+
+				conf.recipient=recipient
+				// final action
+				if (opt.debug) {
+					println myTemplate
+					//println conf.toString()
+					//println ""
+					//println conf.recipients
+					//println ""
+				
+				} else {
+					sendEmail(conf, myTemplate)
+				}
+			}
+
+		}
+
+		catch (IllegalArgumentException e) {
+			println e.message
+			cli.usage()
+			System.exit(1)
+
+		}
+		catch(Exception e) {
 			exitOnError e.message
 		}
 
@@ -55,7 +79,7 @@ class Emailer {
 
 	private static getCommandLineOptions(String[] args){
 		//Parse command-line options
-		def cli = new CliBuilder(
+		cli = new CliBuilder(
 						usage:"emailer [options]",
 						header:"\nAvailable options (use -h for help):\n",
 						width:100)
@@ -87,7 +111,7 @@ class Emailer {
 			cli.usage() 
 			System.exit(0)
 		}
-
+		
 		
 		return options
 	}
@@ -105,6 +129,10 @@ class Emailer {
 			System.exit(1)
 		}
 
+		//consolidate recipient into recipients
+		//recipient will not used from here forward
+		config.put('recipients', config.recipient)
+
 		//Merge the defaults file that was passed on the commandline
 		if(options.defaults){
 			def newConfigFile = new File(options.defaults)
@@ -119,8 +147,8 @@ class Emailer {
 			config.put('template', options.template)
 		}
 
-		if( options?.recipient ) {
-			config.put('recipient', options.recipient)
+		if( options?.recipients ) {
+			config.put('recipients', options.recipients)
 		}
 
 		if( options?.recipientHdr ) {
@@ -137,6 +165,13 @@ class Emailer {
 
 		if( options?.inputFile ) {
 			config.put('inputFile', options.inputFile)
+		}
+
+		if (config.recipients && config.recipientHdr) { 
+			throw new IllegalArgumentException('must only recipient or recipientHdr')
+		}
+		if ((! config.recipients) && (! config.recipientHdr)) {
+			throw new IllegalArgumentException('must specify at least one of recipient or recipientHdr')
 		}
 
 		config
@@ -181,7 +216,7 @@ class Emailer {
 		// Construct the message
 		def msg = new MimeMessage(session)
 		def devteam = new InternetAddress(props.recipient)
-		msg.from = new InternetAddress(props.sender)
+		msg.from = new InternetAddress(props.fromAddr)
 		msg.sentDate = new Date()
 		msg.subject = props.subject
 		msg.setRecipient(Message.RecipientType.TO, devteam)
