@@ -1,6 +1,7 @@
-emailer version 0.1.0
+emailer
 =======
 
+version 0.1.0
 
 emailer - sends mail based on csv input and templates
 
