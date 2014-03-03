@@ -19,7 +19,7 @@ class Emailer {
 	static def cli
 
 	def myTemplate
-	static def version = "20140220-Alpha"
+	static def version = "20140303"
 	def conf = new ConfigObject()
 
 	public static void main(String[] args) {
