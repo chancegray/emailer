@@ -94,6 +94,8 @@ class Emailer {
 		cli.r longOpt:'recipient', args:1, argName:'recipient', 'single recipient'
 		//TODO: add the possibility of a per message custom subject heading?
 		cli.s longOpt:'subject', args:1, argName:'subject', 'subject heading of the message'
+		//TODO: add bcc option (RIGHTNOW cc will default to bcc)
+		cli.c longOpt:'ccfield', args:1, argName:'ccfield', 'carbon copy address'
 		cli.e longOpt:'recipientHdr', args:1, argName:'recipientHdr', 'Header in csv file to identify column with recipient email addresses'
 		cli._ longOpt:'defaults', args:1, argName:'configFileName', 'groovy config file', required: false
 		
@@ -162,6 +164,9 @@ class Emailer {
 		if( options?.sender ) {
 			config.put('sender', options.sender)
 		}
+		if( options?.ccfield ) {
+			config.put('ccfield', options.ccfield)
+		}
 
 		if( options?.inputFile ) {
 			config.put('inputFile', options.inputFile)
@@ -216,6 +221,12 @@ class Emailer {
 		// Construct the message
 		def msg = new MimeMessage(session)
 		def devteam = new InternetAddress(props.recipient)
+		//TODO: process where there are multiple recipients
+		//TODO: add options for bcc/cc
+		if (props.ccfield) {
+			msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(props.ccfield))
+		}
+
 		msg.from = new InternetAddress(props.fromAddr)
 		msg.sentDate = new Date()
 		msg.subject = props.subject

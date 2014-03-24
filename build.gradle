@@ -23,7 +23,7 @@ project.ext {
 dependencies {
     compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
     compile "javax.mail:mail:1.4"
-    compile 'mysql:mysql-connector-java:5.1.26'
+    //compile 'mysql:mysql-connector-java:5.1.26'
     compile "commons-cli:commons-cli:${commonsCliVersion}"
     //compile "net.sf.opencsv:opencsv:${opencsvVersion}" 
     compile "com.xlson.groovycsv:groovycsv:${groovycsvVersion}"
@@ -31,7 +31,7 @@ dependencies {
  
 
 
-    testCompile "org.spockframework:spock-core:${spockVersion}" 
+   // testCompile "org.spockframework:spock-core:${spockVersion}" 
 }
 
  task wrapper(type: Wrapper) {
