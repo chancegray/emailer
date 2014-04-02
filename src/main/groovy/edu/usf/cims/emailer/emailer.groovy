@@ -28,8 +28,13 @@ class Emailer {
 			def opt = getCommandLineOptions(args)
 			def conf = getConfigSettings(opt)
 
+			def maileng = new EmailerEngine()
+
+
+			//read our data file
+   			def fstring = new File(config.inputFile).getText()
 			//get data
-			def CSVContents = retrieveCSVContents(conf)
+			def CSVContents = maileng.parseCSVContents(fstring)
 			
 			//if a recipient hdr is supplied then populate
 			//recipients from that column of the CSV
@@ -46,8 +51,11 @@ class Emailer {
 				//create template
 				def templateData = [ templateData : CSVContents, recipientAddr : recipient, recipientHdr : conf.recipientHdr ]
 
+				//read the template
+				def text = new File(config.template).getText()
+
 				//process the template
-				def myTemplate = runTemplate(conf,templateData)
+				def myTemplate = maileng.runTemplate(text,templateData)
 
 				conf.recipient=recipient
 				// final action
@@ -59,7 +67,7 @@ class Emailer {
 					//println ""
 				
 				} else {
-					sendEmail(conf, myTemplate)
+					maileng.sendEmail(conf, myTemplate)
 				}
 			}
 
