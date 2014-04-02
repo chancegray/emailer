@@ -18,10 +18,6 @@ import static com.xlson.groovycsv.CsvParser.parseCsv
 class EmailerEngine {
 	
 	static def version = "20140402"
-
-	def conf = new ConfigObject()
-	def myTemplate
-
 	
 	def runTemplate (text,templateData) {
 		//construct the template

@@ -32,7 +32,7 @@ class Emailer {
 
 
 			//read our data file
-   			def fstring = new File(config.inputFile).getText()
+   			def fstring = new File(conf.inputFile).getText()
 			//get data
 			def CSVContents = maileng.parseCSVContents(fstring)
 			
@@ -41,6 +41,7 @@ class Emailer {
 			if (conf.recipientHdr) {
 				conf.recipients=[]
 				for (csvline in CSVContents) {
+					print csvline
 					conf.recipients+=csvline.(conf.recipientHdr)
 				}
 
@@ -52,7 +53,7 @@ class Emailer {
 				def templateData = [ templateData : CSVContents, recipientAddr : recipient, recipientHdr : conf.recipientHdr ]
 
 				//read the template
-				def text = new File(config.template).getText()
+				def text = new File(conf.template).getText()
 
 				//process the template
 				def myTemplate = maileng.runTemplate(text,templateData)
