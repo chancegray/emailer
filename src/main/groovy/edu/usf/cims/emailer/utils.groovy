@@ -17,7 +17,7 @@ import static com.xlson.groovycsv.CsvParser.parseCsv
 
 class EmailerEngine {
 	
-	static def version = "20140401"
+	static def version = "20140402"
 
 	def conf = new ConfigObject()
 	def myTemplate
