@@ -5,9 +5,6 @@ import javax.mail.*
 import javax.mail.internet.*
 import javax.activation.*
 
-//for cli parsing and config munging
-//import groovy.util.CliBuilder
-//import org.apache.commons.cli.Option
 import java.utils.*
 
 //for reading csv input files specified at runtime
@@ -19,17 +16,30 @@ class EmailerEngine {
 	
 	static def version = "20140402"
 	
-	def runTemplate (text,templateData) {
+	def runTemplate(template,templateData) {
+		// is the templat an empty string
+		if (template == "") {
+			throw  new EmailerEngineEmptyTemplateException()
+		}
+
+		// is the templateData an empty string
+		if (templateData == "") {
+			throw  new EmailerEngineNoTemplateDataException()
+		}
+
 		//construct the template
 		def engine = new groovy.text.GStringTemplateEngine()
-		def template =  engine.createTemplate(text).make(templateData)
+		def text =  engine.createTemplate(template).make(templateData)
 
 		//return stringified template
 		template = template.toString()
 	}
 
-	def parseCSVContents(fstring) {
-		def data = parseCsv(fstring)
+	def parseCSVContents(csvdata) {
+		if (csvdata == "") {
+			throw new EmailerEngineCSVEmptyStringException()
+		}
+		def data = parseCsv(csvdata)
 		
 		//parse data one line per element into result
 		def result = []
@@ -37,7 +47,6 @@ class EmailerEngine {
 			result+=([line])
 		}
 		result
-
 	}
 
 	def sendEmail(config,templateText) {
@@ -63,8 +72,10 @@ class EmailerEngine {
 		msg.setContent(templateText, "text/html")
 		// Send the message
 		Transport.send(msg)
-
-
 	}
 
 }
+
+class EmailerEngineCSVEmptyStringException extends RuntimeException{}
+class EmailerEngineNoTemplateDataException extends RuntimeException{}
+class EmailerEngineEmptyTemplateException extends RuntimeException{}

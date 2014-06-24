@@ -15,9 +15,7 @@ project.ext {
   groovyVersion = '2.0.5'
   commonsCliVersion = '1.2'
   spockVersion = '0.7-groovy-2.0'
-  //opencsvVersion = '2.3'
   groovycsvVersion = '1.0'
-
 }
 
 dependencies {
@@ -27,15 +25,15 @@ dependencies {
     compile "commons-cli:commons-cli:${commonsCliVersion}"
     //compile "net.sf.opencsv:opencsv:${opencsvVersion}" 
     compile "com.xlson.groovycsv:groovycsv:${groovycsvVersion}"
-    groovy group: 'org.apache.ivy', name:'ivy', version:'2.2.0' 
+    // groovy group: 'org.apache.ivy', name:'ivy', version:'2.2.0' 
  
 
 
-   // testCompile "org.spockframework:spock-core:${spockVersion}" 
+   testCompile "org.spockframework:spock-core:${spockVersion}" 
 }
 
  task wrapper(type: Wrapper) {
-    gradleVersion = '1.6'
+    gradleVersion = '1.8'
 } 
 
 task show << {
