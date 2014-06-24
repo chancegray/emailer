@@ -10,10 +10,6 @@ import groovy.util.CliBuilder
 import org.apache.commons.cli.Option
 import java.utils.*
 
-//for reading csv input files specified at runtime
-import static com.xlson.groovycsv.CsvParser.parseCsv
-
-
 
 class Emailer {
 	static def cli
@@ -29,18 +25,16 @@ class Emailer {
 			def conf = getConfigSettings(opt)
 
 			def maileng = new EmailerEngine()
-
-
-			//read our data file
-   			def fstring = new File(config.inputFile).getText()
+			
 			//get data
-			def CSVContents = maileng.parseCSVContents(fstring)
+			def CSVContents = maileng.parseCSVContents(readInputFile(conf.inputFile))
 			
 			//if a recipient hdr is supplied then populate
 			//recipients from that column of the CSV
 			if (conf.recipientHdr) {
 				conf.recipients=[]
 				for (csvline in CSVContents) {
+					print csvline
 					conf.recipients+=csvline.(conf.recipientHdr)
 				}
 
@@ -52,7 +46,7 @@ class Emailer {
 				def templateData = [ templateData : CSVContents, recipientAddr : recipient, recipientHdr : conf.recipientHdr ]
 
 				//read the template
-				def text = new File(config.template).getText()
+				def text = new File(conf.template).getText()
 
 				//process the template
 				def myTemplate = maileng.runTemplate(text,templateData)
@@ -83,6 +77,11 @@ class Emailer {
 			exitOnError e.message
 		}
 
+	}
+
+	private static readInputFile(csvFile) {
+		def fstring = new File(csvFile).getText()
+   		fstring
 	}
 
 	private static getCommandLineOptions(String[] args){
@@ -200,20 +199,6 @@ class Emailer {
 
 		//return stringified template
 		template = template.toString()
-	}
-
-	private static retrieveCSVContents(config) {
-		//read our data file
-   		def fstring = new File(config.inputFile).getText()
-		def data = parseCsv(fstring)
-		
-		//parse data one line per element into result
-		def result = []
-		for(line in data){
-			result+=([line])
-		}
-		result
-
 	}
 
 	private static exitOnError(errorString){
