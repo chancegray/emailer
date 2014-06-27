@@ -1,6 +1,0 @@
-gid,fname,lname,created_dt,created_vipid,expiration_dt,email
-5,John,Yaya,"2012-07-03 15:00:33",1,"2012-07-03 15:00:33",johnyaya@example.com
-5,Dan,Smallberries,"2012-07-03 15:00:33",1,"2012-07-03 15:00:33",ds@example.com
-3,Edwin,Pookenz,"2012-07-03 15:00:33",3,"2012-07-03 15:00:33",ed.pookenz@example.com
-3,Raymond,Sizzlebach,"2012-07-03 15:00:33",2,"2012-07-03 15:00:33",raysiz@example.com
-3,Kendrick,Raosen,"2012-07-03 15:00:33",3,"2012-07-03 15:00:33",sandyr@example.com
