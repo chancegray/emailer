@@ -62,14 +62,14 @@ class EmailerEngine {
 		if (props.ccfield) {
 			msg.addRecipient(Message.RecipientType.CC, new InternetAddress(props.ccfield))
 		}
-		if (props.ccfields) {
-			props.ccfields.each( {msg.addRecipient(Message.RecipientType.CC, new InternetAddress(it))})
+		if (config.ccfields) {
+			config.ccfields.each() { msg.addRecipient(Message.RecipientType.CC, new InternetAddress(it))}
 		}
 		if (props.bccfield) {
-			msg.addRecipient(Message.RecipientType.CC, new InternetAddress(props.bccfield))
+			msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(props.bccfield))
 		}
-		if (props.bccfields) {
-			props.bccfields.each( {msg.addRecipient(Message.RecipientType.CC, new InternetAddress(it))})
+		if (config.bccfields) {
+			config.bccfields.each() { msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(it))}
 		}
 
 		msg.from = new InternetAddress(props.fromAddr)
