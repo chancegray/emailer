@@ -56,17 +56,26 @@ class EmailerEngine {
 
 		// Construct the message
 		def msg = new MimeMessage(session)
-		def devteam = new InternetAddress(props.recipient)
+		def toAddr = new InternetAddress(props.recipient)
 		//TODO: process where there are multiple recipients
 		//TODO: add options for bcc/cc
 		if (props.ccfield) {
-			msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(props.ccfield))
+			msg.addRecipient(Message.RecipientType.CC, new InternetAddress(props.ccfield))
+		}
+		if (props.ccfields) {
+			props.ccfields.each( {msg.addRecipient(Message.RecipientType.CC, new InternetAddress(it))})
+		}
+		if (props.bccfield) {
+			msg.addRecipient(Message.RecipientType.CC, new InternetAddress(props.bccfield))
+		}
+		if (props.bccfields) {
+			props.bccfields.each( {msg.addRecipient(Message.RecipientType.CC, new InternetAddress(it))})
 		}
 
 		msg.from = new InternetAddress(props.fromAddr)
 		msg.sentDate = new Date()
 		msg.subject = props.subject
-		msg.setRecipient(Message.RecipientType.TO, devteam)
+		msg.setRecipient(Message.RecipientType.TO, toAddr)
 		//TODO: create Header iterator
 		msg.setHeader('Organization', 'USF-IT')
 		msg.setContent(templateText, "text/html")
