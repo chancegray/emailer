@@ -77,14 +77,8 @@ class EmailerEngine {
 		msg.subject = props.subject
 		msg.setRecipient(Message.RecipientType.TO, toAddr)
 		//TODO: create Header iterator
-		if (props.organization) {
-		  msg.setHeader('Organization', props.organization)
-		}
-		if (props.contentType) {
-			msg.setContent(templateText, props.contentType)
-		} else {
-			msg.setContent(templateText, "text/html")
-		}
+		msg.setHeader('Organization', 'USF-IT')
+		msg.setContent(templateText, "text/html")
 		// Send the message
 		Transport.send(msg)
 	}
